@@ -24,7 +24,7 @@ export default function Boot({ onDone }: { onDone(): void }) {
     const finish = () => onDone();
     window.addEventListener('keydown', finish);
     window.addEventListener('pointerdown', finish);
-    const auto = setTimeout(finish, 2500);
+    const auto = setTimeout(finish, 6000);
     return () => {
       window.removeEventListener('keydown', finish);
       window.removeEventListener('pointerdown', finish);
