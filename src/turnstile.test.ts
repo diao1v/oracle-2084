@@ -7,7 +7,7 @@ function installFakeDom(turnstile?: Fake) {
   vi.stubGlobal('document', { createElement: () => ({ style: {} }), body: { appendChild: () => {} } });
   vi.stubGlobal('window', { turnstile });
 }
-const win = () => globalThis as unknown as { window: { turnstile?: Fake; onTurnstileLoad?: () => void } };
+const win = () => globalThis as unknown as { window: { turnstile?: Fake } };
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 describe('initTurnstile + getTurnstileToken', () => {
-  it('renders the widget when the script reports loaded, and a query waits for that token', async () => {
+  it('renders the widget once the script appears, and a query waits for that token', async () => {
     installFakeDom(undefined);
     const { initTurnstile, getTurnstileToken } = await import('./turnstile');
     initTurnstile();
@@ -27,8 +27,7 @@ describe('initTurnstile + getTurnstileToken', () => {
     let cb: Opts | undefined;
     await vi.advanceTimersByTimeAsync(1200);
     win().window.turnstile = { render: (_el, o) => ((cb = o), 'w1'), reset: () => {} };
-    win().window.onTurnstileLoad!();
-    await vi.advanceTimersByTimeAsync(10);
+    await vi.advanceTimersByTimeAsync(150);
     cb!.callback('tok-1');
     await expect(p).resolves.toBe('tok-1');
   });

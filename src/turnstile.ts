@@ -7,7 +7,6 @@ declare global {
       ): string;
       reset(id: string): void;
     };
-    onTurnstileLoad?: () => void;
   }
 }
 
@@ -44,11 +43,18 @@ function renderWidget() {
   }
 }
 
-/** Call once at startup. Renders the widget as soon as the Turnstile script loads (index.html uses ?onload=onTurnstileLoad). */
+const SCRIPT_WAIT_MS = 15_000;
+
+/** Call once at startup. Polls for the Turnstile script (its onload hook races the module bundle) and renders the widget as soon as it is there. */
 export function initTurnstile() {
   newPending();
-  window.onTurnstileLoad = renderWidget;
-  if (window.turnstile) renderWidget();
+  const deadline = Date.now() + SCRIPT_WAIT_MS;
+  const tick = () => {
+    if (window.turnstile) renderWidget();
+    else if (Date.now() < deadline) setTimeout(tick, 100);
+    else console.error('turnstile script never loaded');
+  };
+  tick();
 }
 
 /** Resolves with an unused token (or '' on failure or timeout), then immediately requests the next one. */
