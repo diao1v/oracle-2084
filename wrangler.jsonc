@@ -18,6 +18,7 @@
       "simple": { "limit": 10, "period": 60 }
     }
   ],
+  "routes": [{ "pattern": "2084.diaoev.com", "custom_domain": true }],
   "vars": {
     "GATEWAY_ID": "oracle-2084"
   },
