@@ -41,3 +41,5 @@ for (const [q, expected] of CASES) {
 }
 console.log(`\n${hits}/${CASES.length} hits`);
 process.exitCode = hits === CASES.length ? 0 : 1;
+
+export {};
