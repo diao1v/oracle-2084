@@ -5,7 +5,7 @@ export function makeEnv(overrides: Partial<Env> = {}): Env {
     RATE_LIMITER: { limit: async () => ({ success: true }) },
     VECTORIZE: {
       query: async () => ({ matches: [], count: 0 }),
-      describe: async () => ({ vectorCount: 42, dimensions: 1024 }),
+      describe: async () => ({ vectorsCount: 42, dimensions: 1024 }),
     },
     AI: { run: async () => ({ data: [[0.1, 0.2]] }) },
     ...overrides,

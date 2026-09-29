@@ -11,7 +11,7 @@ export const chatBodySchema = z.object({
     .array(message)
     .min(1)
     .max(8)
-    .refine((m) => m[m.length - 1].role === 'user', { message: 'last message must be from user' }),
+    .refine((m) => m.at(-1)?.role === 'user', { message: 'last message must be from user' }),
 });
 
 export type ChatBody = z.infer<typeof chatBodySchema>;
