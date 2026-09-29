@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 type Opts = { callback(token: string): void; 'error-callback'?(): void };
 
 function installFakeDom(turnstile?: { render(el: unknown, o: Opts): string; reset(id: string): void }) {
-  vi.stubGlobal('document', { createElement: () => ({}), body: { appendChild: () => {} } });
+  vi.stubGlobal('document', { createElement: () => ({ style: {} }), body: { appendChild: () => {} } });
   vi.stubGlobal('window', { turnstile });
 }
 
