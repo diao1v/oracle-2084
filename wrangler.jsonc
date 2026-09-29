@@ -1,5 +1,6 @@
 {
   "name": "oracle-2084",
+  "account_id": "48bfd2e19340a5b463fa3a4c90efe0e1",
   "main": "./worker/index.ts",
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat"],
