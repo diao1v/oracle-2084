@@ -10,7 +10,7 @@ describe('retrieve', () => {
     const query = vi.fn(async () => ({
       matches: [
         match('a:0', 0.9, { source: 'projects/a.md', heading: 'A', text: 'alpha' }),
-        match('b:0', 0.49, { source: 'projects/b.md', heading: 'B', text: 'beta' }),
+        match('b:0', 0.44, { source: 'projects/b.md', heading: 'B', text: 'beta' }),
         match('c:0', 0.7),
       ],
       count: 3,
@@ -36,5 +36,16 @@ describe('buildMessages', () => {
     expect(msgs[0].content).toContain('projects/a.md');
     expect(msgs[0].content).toContain('alpha');
     expect(msgs.at(-1)).toEqual({ role: 'user', content: 'hi' });
+  });
+});
+
+describe('similarity floor', () => {
+  it('keeps a 0.47 match, which bge-m3 gives to correct short-query hits', async () => {
+    const env = makeEnv({
+      VECTORIZE: {
+        query: async () => ({ matches: [{ id: 'a:0', score: 0.47, metadata: { source: 'about.md', heading: 'Identity', text: 'x' } }], count: 1 }),
+      } as unknown as VectorizeIndex,
+    });
+    expect(await retrieve(env, 'who is the subject')).toHaveLength(1);
   });
 });

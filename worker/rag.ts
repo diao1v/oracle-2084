@@ -4,7 +4,7 @@ import type { ChatMessage, Fragment } from './types';
 export const EMBED_MODEL = '@cf/baai/bge-m3';
 export const GEN_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const TOP_K = 6;
-const FLOOR = 0.5;
+const FLOOR = 0.45;
 
 export async function embed(env: Env, text: string): Promise<number[]> {
   const out = (await env.AI.run(EMBED_MODEL, { text: [text] }, { gateway: { id: env.GATEWAY_ID } })) as { data: number[][] };
