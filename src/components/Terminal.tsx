@@ -19,8 +19,12 @@ export default function Terminal() {
   const bottom = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
 
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: 'smooth' }), [messages, error, status]);
-  useEffect(() => input.current?.focus(), [status]);
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, error, status]);
+  useEffect(() => {
+    input.current?.focus();
+  }, [status]);
 
   const submit = (text: string) => {
     setDraft('');

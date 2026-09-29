@@ -40,8 +40,9 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
   const url = new URL(request.url);
   try {
     if (url.pathname === '/api/health') {
-      const info = await env.VECTORIZE.describe();
-      return Response.json({ ok: true, vectors: info.vectorsCount });
+      // Runtime returns vectorCount; the generated type says vectorsCount. Accept both.
+      const info = (await env.VECTORIZE.describe()) as unknown as { vectorCount?: number; vectorsCount?: number };
+      return Response.json({ ok: true, vectors: info.vectorCount ?? info.vectorsCount ?? 0 });
     }
     if (url.pathname === '/api/chat' && request.method === 'POST') return await chat(request, env);
     return new Response('Not found', { status: 404 });

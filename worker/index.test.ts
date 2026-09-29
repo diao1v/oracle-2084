@@ -44,7 +44,7 @@ describe('POST /api/chat', () => {
       AI: { run } as unknown as Ai,
       VECTORIZE: {
         query: async () => ({ matches: [{ id: 'a:0', score: 0.9, metadata: { source: 'about.md', heading: 'Role', text: 'engineer' } }], count: 1 }),
-        describe: async () => ({ vectorsCount: 1 }),
+        describe: async () => ({ vectorCount: 1 }),
       } as unknown as VectorizeIndex,
     });
     vi.stubGlobal('fetch', okVerify);
@@ -71,7 +71,7 @@ describe('POST /api/chat', () => {
       AI: { run } as unknown as Ai,
       VECTORIZE: {
         query: async () => ({ matches: [{ id: 'a:0', score: 0.9, metadata: { source: 's', heading: 'h', text: 't' } }], count: 1 }),
-        describe: async () => ({ vectorsCount: 1 }),
+        describe: async () => ({ vectorCount: 1 }),
       } as unknown as VectorizeIndex,
     });
     vi.stubGlobal('fetch', okVerify);
