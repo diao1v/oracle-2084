@@ -1,13 +1,23 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2023"],
+    "lib": [
+      "ES2023"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["@cloudflare/workers-types", "node"]
+    "types": [
+      "@cloudflare/workers-types",
+      "node"
+    ],
+    "allowImportingTsExtensions": true
   },
-  "include": ["worker", "scripts", "worker-configuration.d.ts"]
+  "include": [
+    "worker",
+    "scripts",
+    "worker-configuration.d.ts"
+  ]
 }
