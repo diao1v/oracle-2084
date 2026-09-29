@@ -25,11 +25,13 @@ export function chunkMarkdown(path: string, markdown: string, opts: Opts = {}): 
   const out: Chunk[] = [];
   for (const s of sections) {
     const words = s.body.join('\n').split(/\s+/).filter(Boolean);
-    for (let start = 0; start < words.length; start += maxWords - overlap) {
-      const text = words.slice(start, start + maxWords).join(' ');
+    const cap = Math.max(overlap + 1, maxWords - (s.heading ? s.heading.split(/\s+/).length : 0));
+    for (let start = 0; start < words.length; start += cap - overlap) {
+      const body = words.slice(start, start + cap).join(' ');
+      const text = s.heading ? `${s.heading}\n${body}` : body;
       const index = out.length;
       out.push({ id: `${prefix}:${index}`, source: path, heading: s.heading, index, text });
-      if (start + maxWords >= words.length) break;
+      if (start + cap >= words.length) break;
     }
   }
   return out;

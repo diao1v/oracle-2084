@@ -41,3 +41,11 @@ describe('chunkMarkdown', () => {
     expect(chunkMarkdown('a.md', '   \n')).toEqual([]);
   });
 });
+
+describe('chunk text', () => {
+  it('starts with the heading so short sections stay retrievable', () => {
+    const chunks = chunkMarkdown('cv.md', '## Education\n\n### Bachelor of Engineering\n*Sichuan University*\n');
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0].text).toBe('Bachelor of Engineering\n*Sichuan University*');
+  });
+});
