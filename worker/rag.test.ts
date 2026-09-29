@@ -19,7 +19,8 @@ describe('retrieve', () => {
 
     const frags = await retrieve(env, 'what is a');
 
-    expect(run).toHaveBeenCalledWith('@cf/baai/bge-m3', { text: ['what is a'] }, { gateway: { id: 'test-gateway' } });
+    // Embeddings skip the gateway: no guardrail round trip, no false positives on retrieval.
+    expect(run).toHaveBeenCalledWith('@cf/baai/bge-m3', { text: ['what is a'] });
     expect(query).toHaveBeenCalledWith([0.5, 0.5], { topK: 6, returnMetadata: 'all' });
     expect(frags).toEqual([{ id: 'a:0', source: 'projects/a.md', heading: 'A', score: 0.9, text: 'alpha' }]);
   });

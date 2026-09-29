@@ -7,7 +7,8 @@ const TOP_K = 6;
 const FLOOR = 0.45;
 
 export async function embed(env: Env, text: string): Promise<number[]> {
-  const out = (await env.AI.run(EMBED_MODEL, { text: [text] }, { gateway: { id: env.GATEWAY_ID } })) as { data: number[][] };
+  // Not routed through the gateway on purpose: Guardrails would scan the query text for nothing.
+  const out = (await env.AI.run(EMBED_MODEL, { text: [text] })) as { data: number[][] };
   return out.data[0];
 }
 
