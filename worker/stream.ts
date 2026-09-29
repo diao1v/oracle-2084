@@ -1,4 +1,6 @@
-import type { DonePayload } from './types';
+import { mapError } from './errors';
+
+type Emit = (name: string, data: unknown) => void;
 
 export function sseEvent(name: string, data: unknown): string {
   return `event: ${name}\ndata: ${JSON.stringify(data)}\n\n`;
@@ -16,35 +18,43 @@ export function parseAiLine(line: string): string | null {
   }
 }
 
-export function toOracleStream(ai: ReadableStream<Uint8Array>, head: string, done: () => DonePayload): ReadableStream<Uint8Array> {
+/**
+ * Runs `producer` and streams whatever it emits as SSE. A throw becomes one `error`
+ * event (guardrail blocks keep their category, everything else is uplink_lost) and the
+ * stream always closes, so the client never waits on a dead connection.
+ */
+export function sseStream(producer: (emit: Emit) => Promise<void>): ReadableStream<Uint8Array> {
   const enc = new TextEncoder();
-  const dec = new TextDecoder();
   return new ReadableStream<Uint8Array>({
     async start(controller) {
-      if (head) controller.enqueue(enc.encode(head));
-      const reader = ai.getReader();
-      let buffer = '';
+      const emit: Emit = (name, data) => controller.enqueue(enc.encode(sseEvent(name, data)));
       try {
-        for (;;) {
-          const { value, done: finished } = await reader.read();
-          if (finished) break;
-          buffer += dec.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() ?? '';
-          for (const line of lines) {
-            const text = parseAiLine(line);
-            if (text) controller.enqueue(enc.encode(sseEvent('delta', { text })));
-          }
-        }
-        const tail = parseAiLine(buffer);
-        if (tail) controller.enqueue(enc.encode(sseEvent('delta', { text: tail })));
-        controller.enqueue(enc.encode(sseEvent('done', done())));
+        await producer(emit);
       } catch (e) {
-        console.error('stream failed', e);
-        controller.enqueue(enc.encode(sseEvent('error', { status: 'uplink_lost' })));
+        emit('error', mapError(e).payload);
       } finally {
         controller.close();
       }
     },
   });
+}
+
+/** Reads a Workers AI SSE stream and emits one `delta` per token. Rethrows source failures. */
+export async function pipeAiStream(ai: ReadableStream<Uint8Array>, emit: Emit): Promise<void> {
+  const dec = new TextDecoder();
+  const reader = ai.getReader();
+  let buffer = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += dec.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    for (const line of lines) {
+      const text = parseAiLine(line);
+      if (text) emit('delta', { text });
+    }
+  }
+  const tail = parseAiLine(buffer);
+  if (tail) emit('delta', { text: tail });
 }

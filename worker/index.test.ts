@@ -27,13 +27,14 @@ describe('POST /api/chat', () => {
     expect(await res.json()).toEqual({ status: 'throttled', retryAfter: 60 });
   });
 
-  it('returns no_record when nothing clears the floor', async () => {
+  it('streams RETRIEVING then a no_record error when nothing clears the floor', async () => {
     const env = makeEnv();
     vi.stubGlobal('fetch', okVerify);
     const res = await handleRequest(post(good), env);
-    expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ status: 'no_record' });
     vi.unstubAllGlobals();
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('text/event-stream');
+    expect(await res.text()).toBe('event: status\ndata: {"text":"RETRIEVING"}\n\n' + 'event: error\ndata: {"status":"no_record"}\n\n');
   });
 
   it('streams fragments, deltas and done on the happy path', async () => {
@@ -52,9 +53,12 @@ describe('POST /api/chat', () => {
     vi.unstubAllGlobals();
     expect(res.headers.get('content-type')).toBe('text/event-stream');
     const text = await res.text();
+    const order = [...text.matchAll(/^event: (\w+)$/gm)].map((m) => m[1]);
+    expect(order).toEqual(['status', 'fragments', 'status', 'delta', 'done']);
+    expect(text).toContain('event: status\ndata: {"text":"RETRIEVING"}');
     expect(text).toContain('event: fragments\ndata: [{"id":"a:0","source":"about.md","heading":"Role","score":0.9,"text":"engineer"}]');
+    expect(text).toContain('event: status\ndata: {"text":"GENERATING"}');
     expect(text).toContain('event: delta\ndata: {"text":"ROLE: ENGINEER"}');
-    expect(text).toContain('event: done');
     expect(run).toHaveBeenLastCalledWith(
       '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
       expect.objectContaining({ stream: true, max_tokens: 400 }),
@@ -62,7 +66,7 @@ describe('POST /api/chat', () => {
     );
   });
 
-  it('maps a guardrail block to rejected', async () => {
+  it('streams a rejected error event when the gateway blocks the prompt', async () => {
     const run = vi.fn(async (model: string) => {
       if (model.startsWith('@cf/baai')) return { data: [[0.1]] };
       throw new Error('2016: blocked (S1)');
@@ -77,7 +81,7 @@ describe('POST /api/chat', () => {
     vi.stubGlobal('fetch', okVerify);
     const res = await handleRequest(post(good), env);
     vi.unstubAllGlobals();
-    expect(res.status).toBe(422);
-    expect(await res.json()).toEqual({ status: 'rejected', category: 'S1' });
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain('event: error\ndata: {"status":"rejected","category":"S1"}');
   });
 });

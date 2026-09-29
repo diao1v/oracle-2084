@@ -2,7 +2,7 @@ import { OracleError, mapError } from './errors';
 import { checkRateLimit, clientIp, verifyTurnstile } from './guard';
 import { GEN_MODEL, buildMessages, retrieve } from './rag';
 import { chatBodySchema } from './schema';
-import { sseEvent, toOracleStream } from './stream';
+import { pipeAiStream, sseStream } from './stream';
 
 function errorResponse(e: OracleError): Response {
   return Response.json(e.payload, { status: e.httpStatus });
@@ -18,22 +18,28 @@ async function chat(request: Request, env: Env): Promise<Response> {
   await verifyTurnstile(turnstileToken, clientIp(request), env.TURNSTILE_SECRET);
   const tGuard = Date.now() - started;
 
-  const fragments = await retrieve(env, messages[messages.length - 1].content);
-  const tRetrieve = Date.now() - started - tGuard;
-  if (fragments.length === 0) return Response.json({ status: 'no_record' });
+  // Headers go out now; everything slow happens inside the stream so the terminal shows progress.
+  const body = sseStream(async (emit) => {
+    emit('status', { text: 'RETRIEVING' });
+    const fragments = await retrieve(env, messages[messages.length - 1].content);
+    const tRetrieve = Date.now() - started - tGuard;
+    if (fragments.length === 0) {
+      emit('error', { status: 'no_record' });
+      return;
+    }
+    emit('fragments', fragments);
+    emit('status', { text: 'GENERATING' });
 
-  const ai = (await env.AI.run(
-    GEN_MODEL,
-    { messages: buildMessages(fragments, messages), stream: true, max_tokens: 400, temperature: 0.3 },
-    { gateway: { id: env.GATEWAY_ID } },
-  )) as ReadableStream<Uint8Array>;
-  console.log('timing ms', JSON.stringify({ guard: tGuard, retrieve: tRetrieve, aiStart: Date.now() - started - tGuard - tRetrieve }));
+    const ai = (await env.AI.run(
+      GEN_MODEL,
+      { messages: buildMessages(fragments, messages), stream: true, max_tokens: 400, temperature: 0.3 },
+      { gateway: { id: env.GATEWAY_ID } },
+    )) as ReadableStream<Uint8Array>;
+    console.log('timing ms', JSON.stringify({ guard: tGuard, retrieve: tRetrieve, aiStart: Date.now() - started - tGuard - tRetrieve }));
 
-  const body = toOracleStream(ai, sseEvent('fragments', fragments), () => ({
-    model: GEN_MODEL,
-    latencyMs: Date.now() - started,
-    fragmentCount: fragments.length,
-  }));
+    await pipeAiStream(ai, emit);
+    emit('done', { model: GEN_MODEL, latencyMs: Date.now() - started, fragmentCount: fragments.length });
+  });
   return new Response(body, {
     headers: { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', 'x-accel-buffering': 'no' },
   });
