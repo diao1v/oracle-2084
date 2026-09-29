@@ -3,7 +3,7 @@ declare global {
     turnstile?: {
       render(
         el: HTMLElement,
-        opts: { sitekey: string; callback(token: string): void; 'error-callback'?(): void },
+        opts: { sitekey: string; appearance?: 'always' | 'interaction-only'; callback(token: string): void; 'error-callback'?(): void },
       ): string;
       reset(id: string): void;
     };
@@ -12,7 +12,8 @@ declare global {
 
 const SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as string;
 const SCRIPT_WAIT_MS = 5000;
-const TOKEN_WAIT_MS = 10_000;
+// Long enough for a visitor to complete an interactive challenge if Turnstile asks for one.
+const TOKEN_WAIT_MS = 60_000;
 
 let widgetId: string | null = null;
 let pending: Promise<string> | null = null;
@@ -34,12 +35,14 @@ async function waitForScript(): Promise<boolean> {
 function ensureWidget() {
   if (widgetId || !window.turnstile) return;
   const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:20';
   document.body.appendChild(el);
   newPending();
   try {
     // Invisible mode is configured on the widget in the dashboard, not here.
     widgetId = window.turnstile.render(el, {
       sitekey: SITEKEY,
+      appearance: 'interaction-only',
       callback: (token) => resolveToken?.(token),
       'error-callback': () => resolveToken?.(''),
     });

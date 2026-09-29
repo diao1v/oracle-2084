@@ -39,7 +39,7 @@ describe('getTurnstileToken', () => {
     installFakeDom({ render: () => 'w1', reset: () => {} });
     const { getTurnstileToken } = await import('./turnstile');
     const p = getTurnstileToken();
-    await vi.advanceTimersByTimeAsync(10_100);
+    await vi.advanceTimersByTimeAsync(60_100);
     await expect(p).resolves.toBe('');
   });
 
