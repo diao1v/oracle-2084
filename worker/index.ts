@@ -13,11 +13,13 @@ async function chat(request: Request, env: Env): Promise<Response> {
   if (!parsed.success) return Response.json({ status: 'rejected' }, { status: 400 });
   const { turnstileToken, messages } = parsed.data;
 
+  const started = Date.now();
   await checkRateLimit(request, env.RATE_LIMITER);
   await verifyTurnstile(turnstileToken, clientIp(request), env.TURNSTILE_SECRET);
+  const tGuard = Date.now() - started;
 
-  const started = Date.now();
   const fragments = await retrieve(env, messages[messages.length - 1].content);
+  const tRetrieve = Date.now() - started - tGuard;
   if (fragments.length === 0) return Response.json({ status: 'no_record' });
 
   const ai = (await env.AI.run(
@@ -25,6 +27,7 @@ async function chat(request: Request, env: Env): Promise<Response> {
     { messages: buildMessages(fragments, messages), stream: true, max_tokens: 400, temperature: 0.3 },
     { gateway: { id: env.GATEWAY_ID } },
   )) as ReadableStream<Uint8Array>;
+  console.log('timing ms', JSON.stringify({ guard: tGuard, retrieve: tRetrieve, aiStart: Date.now() - started - tGuard - tRetrieve }));
 
   const body = toOracleStream(ai, sseEvent('fragments', fragments), () => ({
     model: GEN_MODEL,
