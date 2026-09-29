@@ -11,12 +11,24 @@ declare global {
 }
 
 const SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY as string;
+const SCRIPT_WAIT_MS = 5000;
+const TOKEN_WAIT_MS = 10_000;
+
 let widgetId: string | null = null;
 let pending: Promise<string> | null = null;
 let resolveToken: ((t: string) => void) | null = null;
 
 function newPending() {
   pending = new Promise<string>((resolve) => (resolveToken = resolve));
+}
+
+async function waitForScript(): Promise<boolean> {
+  const deadline = Date.now() + SCRIPT_WAIT_MS;
+  while (!window.turnstile) {
+    if (Date.now() > deadline) return false;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  return true;
 }
 
 function ensureWidget() {
@@ -32,11 +44,13 @@ function ensureWidget() {
   });
 }
 
-/** Resolves with an unused token, then immediately requests the next one. */
+/** Resolves with an unused token (or '' on failure), then immediately requests the next one. */
 export async function getTurnstileToken(): Promise<string> {
+  if (!(await waitForScript())) return '';
   ensureWidget();
   if (!widgetId || !pending) return '';
-  const token = await pending;
+  const timeout = new Promise<string>((r) => setTimeout(() => r(''), TOKEN_WAIT_MS));
+  const token = await Promise.race([pending, timeout]);
   newPending();
   window.turnstile!.reset(widgetId);
   return token;

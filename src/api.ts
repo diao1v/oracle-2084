@@ -35,10 +35,17 @@ export async function sendQuery(messages: ChatMessage[], token: string, h: Handl
     const parsed = parseSse(buffer);
     buffer = parsed.rest;
     for (const ev of parsed.events) {
-      if (ev.name === 'fragments') h.onFragments(JSON.parse(ev.data));
-      else if (ev.name === 'delta') h.onDelta(JSON.parse(ev.data).text);
-      else if (ev.name === 'done') h.onDone(JSON.parse(ev.data));
-      else if (ev.name === 'error') h.onError(JSON.parse(ev.data));
+      let data: unknown;
+      try {
+        data = JSON.parse(ev.data);
+      } catch {
+        reader.cancel().catch(() => {});
+        return h.onError({ status: 'uplink_lost' });
+      }
+      if (ev.name === 'fragments') h.onFragments(data as Fragment[]);
+      else if (ev.name === 'delta') h.onDelta((data as { text: string }).text);
+      else if (ev.name === 'done') h.onDone(data as DonePayload);
+      else if (ev.name === 'error') h.onError(data as ErrorPayload);
     }
   }
 }
