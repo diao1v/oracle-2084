@@ -5,7 +5,7 @@ import { makeEnv } from './test-helpers';
 const match = (id: string, score: number, metadata?: Record<string, unknown>) => ({ id, score, metadata });
 
 describe('retrieve', () => {
-  it('embeds through the gateway and maps matches to fragments above the floor', async () => {
+  it('embeds the query and maps matches to fragments above the floor', async () => {
     const run = vi.fn(async () => ({ data: [[0.5, 0.5]] }));
     const query = vi.fn(async () => ({
       matches: [
