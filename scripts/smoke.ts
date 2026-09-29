@@ -1,6 +1,6 @@
-const ACCOUNT = process.env.CLOUDFLARE_ACCOUNT_ID;
-const TOKEN = process.env.CLOUDFLARE_API_TOKEN;
-if (!ACCOUNT || !TOKEN) throw new Error('CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN must be set in .env');
+const ACCOUNT = process.env.ORACLE_ACCOUNT_ID;
+const TOKEN = process.env.ORACLE_API_TOKEN;
+if (!ACCOUNT || !TOKEN) throw new Error('ORACLE_ACCOUNT_ID and ORACLE_API_TOKEN must be set in .env');
 const BASE = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}`;
 const headers = { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
 

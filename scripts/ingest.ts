@@ -4,14 +4,14 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { chunkMarkdown, type Chunk } from './chunk.ts';
 
-const ACCOUNT = process.env.CLOUDFLARE_ACCOUNT_ID;
-const TOKEN = process.env.CLOUDFLARE_API_TOKEN;
+const ACCOUNT = process.env.ORACLE_ACCOUNT_ID;
+const TOKEN = process.env.ORACLE_API_TOKEN;
 const INDEX = 'oracle-2084';
 const MODEL = '@cf/baai/bge-m3';
 const ROOT = join(import.meta.dirname, '..', 'content');
 const MANIFEST = join(ROOT, 'manifest.json');
 
-if (!ACCOUNT || !TOKEN) throw new Error('CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN must be set in .env');
+if (!ACCOUNT || !TOKEN) throw new Error('ORACLE_ACCOUNT_ID and ORACLE_API_TOKEN must be set in .env');
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
