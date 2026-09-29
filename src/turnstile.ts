@@ -3,7 +3,7 @@ declare global {
     turnstile?: {
       render(
         el: HTMLElement,
-        opts: { sitekey: string; size: 'invisible' | 'normal'; callback(token: string): void; 'error-callback'?(): void },
+        opts: { sitekey: string; callback(token: string): void; 'error-callback'?(): void },
       ): string;
       reset(id: string): void;
     };
@@ -36,12 +36,16 @@ function ensureWidget() {
   const el = document.createElement('div');
   document.body.appendChild(el);
   newPending();
-  widgetId = window.turnstile.render(el, {
-    sitekey: SITEKEY,
-    size: 'invisible',
-    callback: (token) => resolveToken?.(token),
-    'error-callback': () => resolveToken?.(''),
-  });
+  try {
+    // Invisible mode is configured on the widget in the dashboard, not here.
+    widgetId = window.turnstile.render(el, {
+      sitekey: SITEKEY,
+      callback: (token) => resolveToken?.(token),
+      'error-callback': () => resolveToken?.(''),
+    });
+  } catch (e) {
+    console.error('turnstile render failed', e);
+  }
 }
 
 /** Resolves with an unused token (or '' on failure), then immediately requests the next one. */

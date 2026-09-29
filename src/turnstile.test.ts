@@ -58,3 +58,22 @@ describe('getTurnstileToken', () => {
     await expect(second).resolves.toBe('tok-2');
   });
 });
+
+describe('widget rendering', () => {
+  it('does not pass size=invisible (Turnstile rejects it; invisibility is a widget setting)', async () => {
+    let opts: Record<string, unknown> | undefined;
+    installFakeDom({ render: (_el, o) => ((opts = o as unknown as Record<string, unknown>), 'w1'), reset: () => {} });
+    const { getTurnstileToken } = await import('./turnstile');
+    const p = getTurnstileToken();
+    await vi.advanceTimersByTimeAsync(10);
+    (opts as unknown as Opts).callback('tok');
+    await p;
+    expect(opts?.size).not.toBe('invisible');
+  });
+
+  it('returns an empty token instead of throwing when render fails', async () => {
+    installFakeDom({ render: () => { throw new Error('TurnstileError'); }, reset: () => {} });
+    const { getTurnstileToken } = await import('./turnstile');
+    await expect(getTurnstileToken()).resolves.toBe('');
+  });
+});
