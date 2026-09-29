@@ -15,9 +15,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
+      - name: Require Turnstile site key
+        env:
+          VITE_TURNSTILE_SITEKEY: ${{ vars.TURNSTILE_SITEKEY || secrets.TURNSTILE_SITEKEY }}
+        run: test -n "$VITE_TURNSTILE_SITEKEY" || { echo "TURNSTILE_SITEKEY is not set as a variable or secret in the production environment"; exit 1; }
       - run: pnpm build
         env:
-          VITE_TURNSTILE_SITEKEY: ${{ vars.TURNSTILE_SITEKEY }}
+          VITE_TURNSTILE_SITEKEY: ${{ vars.TURNSTILE_SITEKEY || secrets.TURNSTILE_SITEKEY }}
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
