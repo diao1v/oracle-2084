@@ -3,7 +3,7 @@ declare global {
     turnstile?: {
       render(
         el: HTMLElement,
-        opts: { sitekey: string; appearance?: 'always' | 'interaction-only'; callback(token: string): void; 'error-callback'?(): void },
+        opts: { sitekey: string; appearance?: 'always' | 'interaction-only'; callback(token: string): void; 'error-callback'?(code?: string): boolean },
       ): string;
       reset(id: string): void;
     };
@@ -44,7 +44,11 @@ function ensureWidget() {
       sitekey: SITEKEY,
       appearance: 'interaction-only',
       callback: (token) => resolveToken?.(token),
-      'error-callback': () => resolveToken?.(''),
+      'error-callback': (code) => {
+        console.error('turnstile error', code);
+        resolveToken?.('');
+        return true; // handled: keep Turnstile from retrying on its own
+      },
     });
   } catch (e) {
     console.error('turnstile render failed', e);
