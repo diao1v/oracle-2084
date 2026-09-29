@@ -14,7 +14,7 @@ function errorLine(e: ErrorPayload): string {
 }
 
 export default function Terminal() {
-  const { messages, status, error, ask } = useSession();
+  const { messages, status, error, progress, ask } = useSession();
   const [draft, setDraft] = useState('');
   const bottom = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -42,7 +42,9 @@ export default function Terminal() {
             {m.role === 'assistant' && status === 'streaming' && i === messages.length - 1 && <span className="cursor" />}
           </div>
         ))}
-        {status === 'streaming' && messages[messages.length - 1]?.role === 'user' && <div className="cursor">RESPONSE:</div>}
+        {status === 'streaming' && messages[messages.length - 1]?.role === 'user' && (
+          <div className="cursor">RESPONSE: {progress && <span className="text-phosphor-dim">{progress}… </span>}</div>
+        )}
         {error && (
           <div className="mt-2 text-red-400">
             {errorLine(error)}

@@ -6,6 +6,7 @@ type Handlers = {
   onDelta(t: string): void;
   onDone(d: DonePayload): void;
   onError(e: ErrorPayload): void;
+  onStatus?(text: string): void;
 };
 
 export async function sendQuery(messages: ChatMessage[], token: string, h: Handlers): Promise<void> {
@@ -46,6 +47,7 @@ export async function sendQuery(messages: ChatMessage[], token: string, h: Handl
       else if (ev.name === 'delta') h.onDelta((data as { text: string }).text);
       else if (ev.name === 'done') h.onDone(data as DonePayload);
       else if (ev.name === 'error') h.onError(data as ErrorPayload);
+      else if (ev.name === 'status') h.onStatus?.((data as { text: string }).text);
     }
   }
 }

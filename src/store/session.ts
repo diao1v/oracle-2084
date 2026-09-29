@@ -12,6 +12,7 @@ type Session = {
   fragments: Fragment[];
   error: ErrorPayload | null;
   meter: DonePayload | null;
+  progress: string | null;
   boot(): Promise<void>;
   ask(text: string): Promise<void>;
 };
@@ -23,6 +24,7 @@ export const useSession = create<Session>((set, get) => ({
   fragments: [],
   error: null,
   meter: null,
+  progress: null,
 
   async boot() {
     set({ status: 'booting' });
@@ -34,7 +36,7 @@ export const useSession = create<Session>((set, get) => ({
     const content = text.trim().toUpperCase();
     if (!content || get().status === 'streaming') return;
     const history = [...get().messages, { role: 'user' as const, content }].slice(-8);
-    set({ messages: history, fragments: [], error: null, status: 'streaming' });
+    set({ messages: history, fragments: [], error: null, progress: 'LINKING', status: 'streaming' });
 
     const token = await getTurnstileToken();
     let answer = '';
@@ -49,11 +51,13 @@ export const useSession = create<Session>((set, get) => ({
       onFragments: (fragments) => set({ fragments }),
       onDelta: (t) => {
         answer += t;
+        set({ progress: null });
         appendAnswer();
       },
-      onDone: (meter) => set({ meter, status: 'ready' }),
-      onError: (error) => set({ error, status: 'ready' }),
+      onDone: (meter) => set({ meter, progress: null, status: 'ready' }),
+      onError: (error) => set({ error, progress: null, status: 'ready' }),
+      onStatus: (progress) => set({ progress }),
     });
-    if (get().status === 'streaming') set({ status: 'ready' });
+    if (get().status === 'streaming') set({ status: 'ready', progress: null });
   },
 }));

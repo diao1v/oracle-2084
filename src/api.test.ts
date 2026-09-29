@@ -33,3 +33,18 @@ describe('sendQuery', () => {
     expect(errors).toEqual([{ status: 'no_record' }]);
   });
 });
+
+describe('status events', () => {
+  it('reports progress text through onStatus', async () => {
+    vi.stubGlobal('fetch', async () => sse('event: status\ndata: {"text":"RETRIEVING"}\n\nevent: status\ndata: {"text":"GENERATING"}\n\n'));
+    const seen: string[] = [];
+    await sendQuery([{ role: 'user', content: 'x' }], 'tok', {
+      onFragments: () => {},
+      onDelta: () => {},
+      onDone: () => {},
+      onError: () => {},
+      onStatus: (t) => seen.push(t),
+    });
+    expect(seen).toEqual(['RETRIEVING', 'GENERATING']);
+  });
+});
