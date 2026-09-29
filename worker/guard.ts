@@ -13,6 +13,7 @@ export async function verifyTurnstile(token: string, ip: string, secret: string,
       body: new URLSearchParams({ secret, response: token, remoteip: ip }),
       signal: AbortSignal.timeout(10_000),
     });
+    if (!res.ok) console.warn('turnstile siteverify http', res.status, (await res.text()).slice(0, 300));
     if (res.ok) {
       const body = (await res.json()) as { success?: boolean; 'error-codes'?: string[] };
       ok = body.success === true;
