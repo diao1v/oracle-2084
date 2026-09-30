@@ -90,5 +90,11 @@ Work history and employment timeline of the subject, most recent first: Software
 
 ## Certifications
 
+### Microsoft Certified: Azure AI Apps & Agents Developer Associate (AI-103)
+Issued Sep 2026. Covers building AI applications and agents on Azure: Azure AI Foundry, Azure AI Search, Azure OpenAI and Document Intelligence.
+
 ### AWS Certified Solutions Architect - Associate
 Issued Aug 2024 · Expires Aug 2027
+
+### Microsoft Certified: Azure Fundamentals
+Issued 2022
