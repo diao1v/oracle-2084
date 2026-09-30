@@ -16,4 +16,4 @@ Notable personal projects the subject has built: CrawlBrief, an AI-powered compe
 
 ## What else is he doing
 
-Off work the subject makes furniture from wood, models and 3D prints parts, including a large dining table, a tech cabinet with rattan weave, and a shoe rack bench. He built a LEGO HPLC fragment collector, a working lab instrument model, and a Skywatcher Star Adventurer adapter for astrophotography. He rode the Lake Taupo Cycle Challenge, finished Black Myth Wukong, and builds desk gadgets like Beer Time, an ESP32 LED matrix that celebrates Jira status changes. He also keeps a home server and tinkers with PCs.
+Off work the subject makes furniture from wood, models and 3D prints parts, including a large dining table, a tech cabinet with rattan weave, and a shoe rack bench. He built a LEGO HPLC fragment collector, a working lab instrument model, and a Skywatcher Star Adventurer adapter for astrophotography. He rode the Lake Taupo Cycle Challenge, finished Black Myth Wukong, and builds desk gadgets like Beer Time, an ESP32 LED matrix that celebrates Jira status changes. He also runs homelab servers and tinkers with PCs.
