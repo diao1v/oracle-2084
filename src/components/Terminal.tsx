@@ -16,14 +16,17 @@ function errorLine(e: ErrorPayload): string {
 export default function Terminal() {
   const { messages, status, error, progress, ask } = useSession();
   const [draft, setDraft] = useState('');
-  const bottom = useRef<HTMLDivElement>(null);
+  const log = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
 
+  // Scroll the log container directly and focus without scrolling: scrollIntoView() and focus()
+  // also scroll ancestor frames, which shoved this page out of view inside the 3D Macintosh.
   useEffect(() => {
-    bottom.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = log.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages, error, status]);
   useEffect(() => {
-    input.current?.focus();
+    input.current?.focus({ preventScroll: true });
   }, [status]);
 
   const submit = (text: string) => {
@@ -35,7 +38,7 @@ export default function Terminal() {
 
   return (
     <section className="flex h-full flex-col p-4 md:p-6" onClick={() => input.current?.focus()}>
-      <div className="glow flex-1 overflow-y-auto text-sm leading-6">
+      <div ref={log} className="glow flex-1 overflow-y-auto text-sm leading-6">
         {messages.map((m, i) => (
           <div key={i} className={m.role === 'user' ? 'mt-4 text-phosphor-dim' : 'whitespace-pre-wrap'}>
             {m.role === 'user' ? `QUERY: ${m.content}` : `RESPONSE:\n${m.content}`}
@@ -53,7 +56,6 @@ export default function Terminal() {
             )}
           </div>
         )}
-        <div ref={bottom} />
       </div>
 
       {messages.length === 0 && (
