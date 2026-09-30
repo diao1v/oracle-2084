@@ -1,7 +1,7 @@
 # About the subject
 
 ## Identity
-The subject is Yiwei Diao, a full stack software developer based in Auckland, New Zealand. Yiwei describes himself as a daily life enthusiast who is passionate about creating things: web apps, woodwork, photos, LEGO builds and PC builds.
+The subject is Yiwei Diao, a full stack software developer and AI engineer based in Auckland, New Zealand. Yiwei describes himself as a daily life enthusiast who is passionate about creating things: web apps, AI agents, woodwork, 3D modelling and 3D printing, photos, LEGO builds and PC builds.
 
 ## Current role
 Software Developer at PageProof in Auckland, New Zealand, since June 2025. Works end to end across a 25+ microservice platform and has built AI systems there, including a multi-agent platform that takes a Jira ticket to a human-reviewed pull request.
