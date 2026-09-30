@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSession } from '../store/session';
 import type { ErrorPayload } from '../../worker/types';
+import type { QuerySource } from '../analytics';
 
 const SUGGESTIONS = ['WHAT IS THIS', 'WHO IS THIS GUY', 'WHAT HAS HE DONE', 'WHAT ELSE IS HE DOING'];
 
@@ -29,9 +30,9 @@ export default function Terminal() {
     input.current?.focus({ preventScroll: true });
   }, [status]);
 
-  const submit = (text: string) => {
+  const submit = (text: string, source: QuerySource = 'typed') => {
     setDraft('');
-    void ask(text);
+    void ask(text, source);
   };
 
   const lastUser = [...messages].reverse().find((m) => m.role === 'user');
@@ -61,7 +62,7 @@ export default function Terminal() {
       {messages.length === 0 && (
         <div className="mb-3 flex flex-wrap gap-2 text-xs text-phosphor-dim">
           {SUGGESTIONS.map((s) => (
-            <button key={s} className="border border-phosphor-dim px-2 py-1 hover:text-phosphor" onClick={() => submit(s)}>
+            <button key={s} className="border border-phosphor-dim px-2 py-1 hover:text-phosphor" onClick={() => submit(s, 'suggestion')}>
               {s}
             </button>
           ))}

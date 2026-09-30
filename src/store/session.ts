@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { fetchHealth, sendQuery } from '../api';
 import { getTurnstileToken } from '../turnstile';
+import { queryEvent, track, type QueryOutcome, type QuerySource } from '../analytics';
 import type { ChatMessage, DonePayload, ErrorPayload, Fragment } from '../../worker/types';
 
 type Status = 'idle' | 'booting' | 'ready' | 'streaming';
@@ -14,7 +15,7 @@ type Session = {
   meter: DonePayload | null;
   progress: string | null;
   boot(): Promise<void>;
-  ask(text: string): Promise<void>;
+  ask(text: string, source?: QuerySource): Promise<void>;
 };
 
 export const useSession = create<Session>((set, get) => ({
@@ -30,9 +31,10 @@ export const useSession = create<Session>((set, get) => ({
     set({ status: 'booting' });
     const vectors = await fetchHealth().catch(() => 0);
     set({ vectors, status: 'ready' });
+    track('oracle_boot', { vectors, embedded: window.self !== window.top });
   },
 
-  async ask(text) {
+  async ask(text, source = 'typed') {
     const content = text.trim().toUpperCase();
     if (!content || get().status === 'streaming') return;
     const history = [...get().messages, { role: 'user' as const, content }].slice(-8);
@@ -40,6 +42,8 @@ export const useSession = create<Session>((set, get) => ({
 
     const token = await getTurnstileToken();
     let answer = '';
+    // Object, not a let: the callbacks below assign it and TS would otherwise narrow it to the initial literal.
+    const result: { outcome: QueryOutcome } = { outcome: 'uplink_lost' };
     const appendAnswer = () =>
       set((s) => {
         const last = s.messages[s.messages.length - 1];
@@ -54,10 +58,17 @@ export const useSession = create<Session>((set, get) => ({
         set({ progress: null });
         appendAnswer();
       },
-      onDone: (meter) => set({ meter, progress: null, status: 'ready' }),
-      onError: (error) => set({ error, progress: null, status: 'ready' }),
+      onDone: (meter) => {
+        result.outcome = 'answered';
+        set({ meter, progress: null, status: 'ready' });
+      },
+      onError: (error) => {
+        result.outcome = error.status;
+        set({ error, progress: null, status: 'ready' });
+      },
       onStatus: (progress) => set({ progress }),
     });
     if (get().status === 'streaming') set({ status: 'ready', progress: null });
+    track('oracle_query', queryEvent(content, source, result.outcome, result.outcome === 'answered' ? get().meter : null));
   },
 }));
