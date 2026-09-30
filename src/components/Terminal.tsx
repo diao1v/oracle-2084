@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSession } from '../store/session';
 import type { ErrorPayload } from '../../worker/types';
 
-const SUGGESTIONS = ['WHO IS THE SUBJECT', 'LIST PROJECTS', 'EXPLAIN CRAWLBRIEF', 'OFF-DUTY RECORDS'];
+const SUGGESTIONS = ['WHAT IS THIS', 'WHO IS THIS GUY', 'WHAT HAS HE DONE', 'WHAT ELSE IS HE DOING'];
 
 function errorLine(e: ErrorPayload): string {
   switch (e.status) {

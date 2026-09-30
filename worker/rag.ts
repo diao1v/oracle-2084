@@ -28,6 +28,7 @@ export async function retrieve(env: Env, query: string): Promise<Fragment[]> {
 }
 
 export function buildMessages(fragments: Fragment[], history: ChatMessage[]) {
-  const block = fragments.map((f) => `FRAGMENT ${f.id} · ${f.source} · ${f.heading}\n${f.text}`).join('\n\n');
+  // Numbered records only: ids and file names are kept out so the model cannot quote them back.
+  const block = fragments.map((f, i) => `[RECORD ${i + 1}]\n${f.text}`).join('\n\n');
   return [{ role: 'system' as const, content: SYSTEM_PROMPT + block }, ...history];
 }

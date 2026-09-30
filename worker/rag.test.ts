@@ -33,9 +33,9 @@ describe('buildMessages', () => {
       [{ role: 'user', content: 'hi' }],
     );
     expect(msgs[0].role).toBe('system');
-    expect(msgs[0].content).toContain('FRAGMENT a:0');
-    expect(msgs[0].content).toContain('projects/a.md');
-    expect(msgs[0].content).toContain('alpha');
+    expect(msgs[0].content).toContain('[RECORD 1]\nalpha');
+    expect(msgs[0].content).not.toContain('a:0');
+    expect(msgs[0].content).not.toContain('projects/a.md');
     expect(msgs.at(-1)).toEqual({ role: 'user', content: 'hi' });
   });
 });
