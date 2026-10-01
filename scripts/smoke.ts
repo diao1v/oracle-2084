@@ -35,7 +35,7 @@ for (const [q, expected] of CASES) {
   if (!res.ok) throw new Error(`query failed: ${res.status} ${await res.text()}`);
   const { result } = (await res.json()) as { result: { matches: { score: number; metadata: { source: string } }[] } };
   const top = result.matches[0];
-  const hit = top && top.score >= 0.45 && top.metadata.source.includes(expected);
+  const hit = top && top.score >= 0.40 && top.metadata.source.includes(expected);
   hits += hit ? 1 : 0;
   console.log(`${hit ? 'HIT ' : 'MISS'} ${q.padEnd(40)} -> ${top?.metadata.source ?? 'none'} (${top?.score.toFixed(2) ?? '-'})`);
 }

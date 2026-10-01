@@ -10,7 +10,7 @@ describe('retrieve', () => {
     const query = vi.fn(async () => ({
       matches: [
         match('a:0', 0.9, { source: 'projects/a.md', heading: 'A', text: 'alpha' }),
-        match('b:0', 0.44, { source: 'projects/b.md', heading: 'B', text: 'beta' }),
+        match('b:0', 0.39, { source: 'projects/b.md', heading: 'B', text: 'beta' }),
         match('c:0', 0.7),
       ],
       count: 3,

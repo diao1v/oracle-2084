@@ -4,7 +4,7 @@ import type { ChatMessage, Fragment } from './types';
 export const EMBED_MODEL = '@cf/baai/bge-m3';
 export const GEN_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const TOP_K = 6;
-const FLOOR = 0.45;
+const FLOOR = 0.40; // unrelated chunks score ~0.33-0.36; two-topic questions split their score across sections
 
 export async function embed(env: Env, text: string): Promise<number[]> {
   // Not routed through the gateway on purpose: Guardrails would scan the query text for nothing.
