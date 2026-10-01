@@ -39,9 +39,11 @@ const chunks: Chunk[] = files.flatMap((f) => chunkMarkdown(relative(ROOT, f), re
 console.log(`${files.length} files -> ${chunks.length} chunks`);
 
 const vectors: number[][] = [];
-for (let i = 0; i < chunks.length; i += 100) {
-  vectors.push(...(await embed(chunks.slice(i, i + 100).map((c) => c.text))));
-  console.log(`embedded ${Math.min(i + 100, chunks.length)}/${chunks.length}`);
+// Small batches: bge-m3 caps a request at 60k tokens and chunks run to ~500 tokens each.
+const BATCH = 25;
+for (let i = 0; i < chunks.length; i += BATCH) {
+  vectors.push(...(await embed(chunks.slice(i, i + BATCH).map((c) => c.text))));
+  console.log(`embedded ${Math.min(i + BATCH, chunks.length)}/${chunks.length}`);
 }
 
 const dir = mkdtempSync(join(tmpdir(), 'oracle-'));
