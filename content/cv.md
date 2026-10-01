@@ -1,5 +1,8 @@
 # CV of the subject
 
+Summary: Daily life enthusiast, full stack developer and AI engineer, passionate about creating things (web apps, AI agents, homelab servers, woodwork, 3D modelling and printing, photos, LEGO, PCs, etc.).
+Contact: ev@diaoev.com · Auckland, New Zealand.
+
 ## Professional Experience
 
 Work history and employment timeline of the subject, most recent first: Software Developer at PageProof (Jun 2025 to present); Web Developer at Spark (Feb 2023 to Jun 2025); Full Stack Developer at Spark Sport (Jul 2022 to Feb 2023); Full Stack Developer at MediaWorks (Oct 2021 to Jun 2022); Research Technician at the University of Auckland (Feb 2018 to Oct 2021); Molecular Scientist at Pace Analytical Energy Services, Pittsburgh (Apr 2015 to Nov 2017); Research Assistant at the University of Oklahoma (Aug 2011 to Oct 2014). Career changed from microbiology research to software development in 2021.
